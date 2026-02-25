@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitud de Cotización</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --cream: #f7f4ef;
+    --warm: #e8e0d4;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --rust: #b85c38;
+    --muted: #7a7065;
+    --surface: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 85% 80%, rgba(184,92,56,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(38px, 7vw, 62px);
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .header p {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Progress */
+  .progress-bar {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 56px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
+  .progress-step.active { color: var(--ink); }
+  .progress-step.done { color: var(--gold); }
+
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .progress-step.active .step-dot {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+
+  .progress-step.done .step-dot {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
+  }
+
+  .step-line {
+    width: 40px;
+    height: 1px;
+    background: var(--warm);
+  }
+
+  /* Sections */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--warm);
+    border-radius: 8px;
+    padding: 40px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s ease both;
+    display: none;
+  }
+
+  .section.visible { display: block; }
+
+  .section:nth-child(1) { animation-delay: 0.15s; }
+  .section:nth-child(2) { animation-delay: 0.25s; }
+  .section:nth-child(3) { animation-delay: 0.35s; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--ink);
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--warm);
+  }
+
+  /* Form elements */
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .field-group.full { grid-template-columns: 1fr; }
+  .field-group.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  label span.req { color: var(--rust); margin-left: 2px; }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--cream);
+    border: 1.5px solid var(--warm);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    transition: all 0.2s;
+    outline: none;
+    appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+
+  input::placeholder, textarea::placeholder { color: #b8b0a4; }
+
+  textarea { resize: vertical; min-height: 100px; }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7065' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+  }
+
+  /* Product cards */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .product-card {
+    position: relative;
+    border: 1.5px solid var(--warm);
+    border-radius: 8px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--cream);
+  }
+
+  .product-card:hover {
+    border-color: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .product-card.selected {
+    border-color: var(--gold);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+
+  .product-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .product-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .product-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .product-price {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .check-mark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 18px;
+    height: 18px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-card.selected .check-mark { display: flex; }
+  .check-mark::after { content: '✓'; color: white; font-size: 10px; font-weight: 700; }
+
+  /* Medidas */
+  .medidas-container {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .medidas-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .dimension-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dimension-input input {
+    text-align: center;
+    font-size: 22px;
+    font-family: 'DM Serif Display', serif;
+    padding: 16px;
+    max-width: 120px;
+  }
+
+  .dim-x {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--muted);
+  }
+
+  .dim-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dim-wrapper { display: flex; flex-direction: column; }
+
+  /* Extras checkboxes */
+  .extras-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .extra-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--warm);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+  }
+
+  .extra-item:hover { border-color: var(--gold-light); }
+
+  .extra-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .extra-item.checked {
+    border-color: var(--gold);
+    background: white;
+  }
+
+  .extra-info { flex: 1; }
+
+  .extra-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .extra-cost {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Live price preview */
+  .price-preview {
+    background: var(--ink);
+    color: white;
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .price-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+  }
+
+  .price-amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    color: var(--gold-light);
+    line-height: 1;
+  }
+
+  .price-amount span {
+    font-size: 22px;
+    vertical-align: top;
+    margin-top: 6px;
+    display: inline-block;
+    color: rgba(255,255,255,0.6);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+  }
+
+  .price-breakdown {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.8;
+    text-align: right;
+  }
+
+  .price-breakdown strong { color: rgba(255,255,255,0.8); }
+
+  /* Buttons */
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 32px;
+  }
+
+  .btn-back {
+    padding: 14px 28px;
+    background: transparent;
+    border: 1.5px solid var(--warm);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover { border-color: var(--muted); color: var(--ink); }
+
+  .btn-next {
+    padding: 14px 36px;
+    background: var(--ink);
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.03em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-next::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateX(-100%);
+    transition: transform 0.35s ease;
+  }
+
+  .btn-next:hover::before { transform: translateX(0); }
+  .btn-next span { position: relative; z-index: 1; }
+
+  .btn-submit {
+    padding: 16px 48px;
+    background: var(--gold);
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-submit:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(201,168,76,0.35);
+  }
+
+  /* Success */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 80px 40px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--warm);
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .success-screen.visible { display: block; }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 28px;
+  }
+
+  .success-screen h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    margin-bottom: 14px;
+  }
+
+  .success-screen p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Error */
+  .field-error {
+    font-size: 12px;
+    color: var(--rust);
+    margin-top: 4px;
+  }
+
+  input.error, select.error { border-color: var(--rust); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .section { padding: 28px 20px; }
+    .product-grid { grid-template-columns: 1fr 1fr; }
+    .field-group, .extras-grid { grid-template-columns: 1fr; }
+    .field-group.three { grid-template-columns: 1fr 1fr; }
+    .price-preview { flex-direction: column; gap: 20px; }
+    .price-breakdown { text-align: left; }
+    .dimension-input { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">Servicio Profesional</div>
+    <h1>Solicitud de<br><em>Cotización</em></h1>
+    <p>Completa el formulario y recibirás tu cotización personalizada en minutos.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-step active" data-step="1">
+      <div class="step-dot">1</div>
+      <span>Cliente</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="progress-step" data-step="2">
+      <div class="step-dot">2</div>
+      <span>Producto</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="progress-step" data-step="3">
+      <div class="step-dot">3</div>
+      <span>Detalles</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="progress-step" data-step="4">
+      <div class="step-dot">4</div>
+      <span>Resumen</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: Cliente -->
+  <div class="section visible" id="step1">
+    <div class="section-label">Paso 01</div>
+    <div class="section-title">Información del cliente</div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input type="text" id="nombre" placeholder="Juan García" required>
+      </div>
+      <div class="field">
+        <label>Empresa</label>
+        <input type="text" id="empresa" placeholder="Empresa S.A.">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="juan@empresa.com" required>
+      </div>
+      <div class="field">
+        <label>Teléfono <span class="req">*</span></label>
+        <input type="tel" id="telefono" placeholder="+52 55 1234 5678" required>
+      </div>
+    </div>
+
+    <div class="field-group full">
+      <div class="field">
+        <label>Ciudad / Estado</label>
+        <input type="text" id="ciudad" placeholder="Ciudad de México">
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-next" onclick="goToStep(2)"><span>Siguiente →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Producto -->
+  <div class="section" id="step2">
+    <div class="section-label">Paso 02</div>
+    <div class="section-title">Selecciona el producto</div>
+
+    <div class="product-grid" id="productGrid">
+      <label class="product-card" onclick="selectProduct(this, 'Ventana Estándar', 850)">
+        <input type="radio" name="producto" value="Ventana Estándar">
+        <span class="product-icon">🪟</span>
+        <div class="product-name">Ventana Estándar</div>
+        <div class="product-price">desde $850/m²</div>
+        <div class="check-mark"></div>
+      </label>
+      <label class="product-card" onclick="selectProduct(this, 'Ventana Corredera', 1100)">
+        <input type="radio" name="producto" value="Ventana Corredera">
+        <span class="product-icon">🚪</span>
+        <div class="product-name">Ventana Corredera</div>
+        <div class="product-price">desde $1,100/m²</div>
+        <div class="check-mark"></div>
+      </label>
+      <label class="product-card" onclick="selectProduct(this, 'Puerta Principal', 1400)">
+        <input type="radio" name="producto" value="Puerta Principal">
+        <span class="product-icon">🚪</span>
+        <div class="product-name">Puerta Principal</div>
+        <div class="product-price">desde $1,400/m²</div>
+        <div class="check-mark"></div>
+      </label>
+      <label class="product-card" onclick="selectProduct(this, 'Mampara de Baño', 950)">
+        <input type="radio" name="producto" value="Mampara de Baño">
+        <span class="product-icon">🛁</span>
+        <div class="product-name">Mampara de Baño</div>
+        <div class="product-price">desde $950/m²</div>
+        <div class="check-mark"></div>
+      </label>
+      <label class="product-card" onclick="selectProduct(this, 'Fachada Completa', 1800)">
+        <input type="radio" name="producto" value="Fachada Completa">
+        <span class="product-icon">🏢</span>
+        <div class="product-name">Fachada Completa</div>
+        <div class="product-price">desde $1,800/m²</div>
+        <div class="check-mark"></div>
+      </label>
+      <label class="product-card" onclick="selectProduct(this, 'Personalizado', 1200)">
+        <input type="radio" name="producto" value="Personalizado">
+        <span class="product-icon">✏️</span>
+        <div class="product-name">Personalizado</div>
+        <div class="product-price">cotización especial</div>
+        <div class="check-mark"></div>
+      </label>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>Material</label>
+        <select id="material">
+          <option value="">Seleccionar material...</option>
+          <option value="PVC Básico">PVC Básico (+$0)</option>
+          <option value="PVC Premium">PVC Premium (+$180/m²)</option>
+          <option value="Aluminio Natural">Aluminio Natural (+$220/m²)</option>
+          <option value="Aluminio Lacado">Aluminio Lacado (+$380/m²)</option>
+          <option value="Vidrio Templado">Vidrio Templado (+$150/m²)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Color / Acabado</label>
+        <select id="color">
+          <option value="Blanco">Blanco</option>
+          <option value="Negro">Negro (+$120/m²)</option>
+          <option value="Gris Antracita">Gris Antracita (+$150/m²)</option>
+          <option value="Madera Natural">Madera Natural (+$200/m²)</option>
+          <option value="Personalizado">Personalizado (+$250/m²)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group full">
+      <div class="field">
+        <label>Cantidad de unidades <span class="req">*</span></label>
+        <input type="number" id="cantidad" min="1" value="1" placeholder="1">
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-back" onclick="goToStep(1)">← Atrás</button>
+      <button class="btn-next" onclick="goToStep(3)"><span>Siguiente →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Medidas y extras -->
+  <div class="section" id="step3">
+    <div class="section-label">Paso 03</div>
+    <div class="section-title">Medidas y características</div>
+
+    <div class="medidas-container">
+      <div class="medidas-title">Dimensiones (metros)</div>
+      <div class="dimension-input">
+        <div class="dim-wrapper">
+          <input type="number" id="ancho" min="0.1" step="0.01" placeholder="1.20" oninput="calcularPrecio()">
+          <div class="dim-label">Ancho</div>
+        </div>
+        <div class="dim-x">×</div>
+        <div class="dim-wrapper">
+          <input type="number" id="alto" min="0.1" step="0.01" placeholder="1.50" oninput="calcularPrecio()">
+          <div class="dim-label">Alto</div>
+        </div>
+        <div style="padding: 0 8px; color: var(--muted); font-size: 20px; margin-top: -16px">=</div>
+        <div class="dim-wrapper">
+          <input type="text" id="area" placeholder="1.80 m²" readonly style="background: white; font-weight: 600;">
+          <div class="dim-label">Área</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="font-size:18px; margin-bottom: 20px;">Extras y opcionales</div>
+
+    <div class="extras-grid" id="extrasGrid">
+      <label class="extra-item" onclick="toggleExtra(this)">
+        <input type="checkbox" name="extras" value="Instalación" data-precio="450">
+        <div class="extra-info">
+          <div class="extra-name">🔧 Instalación profesional</div>
+          <div class="extra-cost">+$450 por unidad</div>
+        </div>
+      </label>
+      <label class="extra-item" onclick="toggleExtra(this)">
+        <input type="checkbox" name="extras" value="Vidrio Doble" data-precio="280">
+        <div class="extra-info">
+          <div class="extra-name">🔲 Vidrio doble hermético</div>
+          <div class="extra-cost">+$280/m² adicional</div>
+        </div>
+      </label>
+      <label class="extra-item" onclick="toggleExtra(this)">
+        <input type="checkbox" name="extras" value="Mosquitero" data-precio="180">
+        <div class="extra-info">
+          <div class="extra-name">🕸️ Mosquitero incluido</div>
+          <div class="extra-cost">+$180 por unidad</div>
+        </div>
+      </label>
+      <label class="extra-item" onclick="toggleExtra(this)">
+        <input type="checkbox" name="extras" value="Garantía Extendida" data-precio="350">
+        <div class="extra-info">
+          <div class="extra-name">🛡️ Garantía extendida 5 años</div>
+          <div class="extra-cost">+$350 por unidad</div>
+        </div>
+      </label>
+      <label class="extra-item" onclick="toggleExtra(this)">
+        <input type="checkbox" name="extras" value="Entrega Express" data-precio="600">
+        <div class="extra-info">
+          <div class="extra-name">⚡ Entrega express 48h</div>
+          <div class="extra-cost">+$600 total</div>
+        </div>
+      </label>
+      <label class="extra-item" onclick="toggleExtra(this)">
+        <input type="checkbox" name="extras" value="Tintado UV" data-precio="220">
+        <div class="extra-info">
+          <div class="extra-name">🌞 Tintado protección UV</div>
+          <div class="extra-cost">+$220/m² adicional</div>
+        </div>
+      </label>
+    </div>
+
+    <div class="field-group full">
+      <div class="field">
+        <label>Notas adicionales</label>
+        <textarea id="notas" placeholder="Describe cualquier requerimiento especial, tipo de apertura, medidas de refuerzo, etc."></textarea>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-back" onclick="goToStep(2)">← Atrás</button>
+      <button class="btn-next" onclick="goToStep(4)"><span>Ver Cotización →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Resumen -->
+  <div class="section" id="step4">
+    <div class="section-label">Paso 04</div>
+    <div class="section-title">Resumen de cotización</div>
+
+    <div id="resumenHTML"></div>
+
+    <div class="price-preview">
+      <div>
+        <div class="price-label">Total estimado</div>
+        <div class="price-amount"><span>$</span><span id="precioFinal">0</span></div>
+        <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:8px;">IVA incluido</div>
+      </div>
+      <div class="price-breakdown" id="desglose">
+        —
+      </div>
+    </div>
+
+    <div class="field-group full" style="margin-top:8px;">
+      <div class="field">
+        <label>Vigencia de cotización</label>
+        <select id="vigencia">
+          <option>15 días hábiles</option>
+          <option>30 días hábiles</option>
+          <option>Urgente — 5 días</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-back" onclick="goToStep(3)">← Modificar</button>
+      <button class="btn-submit" onclick="enviarCotizacion()">✉ Enviar Cotización por Correo</button>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✓</div>
+    <h2>¡Cotización enviada!</h2>
+    <p>Hemos recibido tu solicitud. En breve recibirás un correo con tu cotización en PDF personalizada.</p>
+    <p style="margin-top:24px; font-size:14px;">Folio: <strong id="folioNum">—</strong></p>
+  </div>
+
+</div>
+
+<script>
+let precioBase = 0;
+let productoSeleccionado = '';
+
+const materialPrecios = { '': 0, 'PVC Básico': 0, 'PVC Premium': 180, 'Aluminio Natural': 220, 'Aluminio Lacado': 380, 'Vidrio Templado': 150 };
+const colorPrecios = { 'Blanco': 0, 'Negro': 120, 'Gris Antracita': 150, 'Madera Natural': 200, 'Personalizado': 250 };
+
+function selectProduct(card, nombre, precio) {
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  productoSeleccionado = nombre;
+  precioBase = precio;
+  calcularPrecio();
+}
+
+function toggleExtra(item) {
+  setTimeout(() => {
+    const cb = item.querySelector('input[type="checkbox"]');
+    item.classList.toggle('checked', cb.checked);
+    calcularPrecio();
+  }, 0);
+}
+
+function calcularPrecio() {
+  const ancho = parseFloat(document.getElementById('ancho').value) || 0;
+  const alto = parseFloat(document.getElementById('alto').value) || 0;
+  const cantidad = parseInt(document.getElementById('cantidad').value) || 1;
+  const area = ancho * alto;
+
+  if (area > 0) {
+    document.getElementById('area').value = area.toFixed(2) + ' m²';
+  }
+
+  const materialExtra = materialPrecios[document.getElementById('material').value] || 0;
+  const colorExtra = colorPrecios[document.getElementById('color').value] || 0;
+
+  const precioM2 = precioBase + materialExtra + colorExtra;
+  const subtotalBase = precioM2 * area * cantidad;
+
+  let extrasTotal = 0;
+  document.querySelectorAll('#extrasGrid input[type="checkbox"]:checked').forEach(cb => {
+    extrasTotal += parseFloat(cb.dataset.precio) * cantidad;
+  });
+
+  const total = subtotalBase + extrasTotal;
+  return { area, cantidad, precioM2, subtotalBase, extrasTotal, total };
+}
+
+function goToStep(step) {
+  // Validación básica
+  if (step === 2) {
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const telefono = document.getElementById('telefono').value;
+    if (!nombre || !email || !telefono) {
+      alert('Por favor completa los campos requeridos.');
+      return;
+    }
+  }
+  if (step === 3 && !productoSeleccionado) {
+    alert('Por favor selecciona un producto.');
+    return;
+  }
+  if (step === 4) {
+    const ancho = document.getElementById('ancho').value;
+    const alto = document.getElementById('alto').value;
+    if (!ancho || !alto) {
+      alert('Por favor ingresa las medidas del producto.');
+      return;
+    }
+    buildResumen();
+  }
+
+  // Hide all sections
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('step' + step).classList.add('visible');
+
+  // Update progress
+  document.querySelectorAll('.progress-step').forEach(s => {
+    const n = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (n === step) s.classList.add('active');
+    else if (n < step) s.classList.add('done');
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function buildResumen() {
+  const { area, cantidad, precioM2, subtotalBase, extrasTotal, total } = calcularPrecio();
+  const extras = Array.from(document.querySelectorAll('#extrasGrid input:checked')).map(c => c.value);
+
+  const html = `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; padding:24px; background:var(--cream); border-radius:8px;">
+      <div>
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Cliente</div>
+        <div style="font-weight:600;">${document.getElementById('nombre').value}</div>
+        <div style="font-size:14px; color:var(--muted);">${document.getElementById('email').value}</div>
+        <div style="font-size:14px; color:var(--muted);">${document.getElementById('telefono').value}</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Producto</div>
+        <div style="font-weight:600;">${productoSeleccionado}</div>
+        <div style="font-size:14px; color:var(--muted);">${document.getElementById('material').value || 'Sin material'} · ${document.getElementById('color').value}</div>
+        <div style="font-size:14px; color:var(--muted);">${area.toFixed(2)} m² · ${cantidad} unidad(es)</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('resumenHTML').innerHTML = html;
+
+  const desgloseLines = [
+    `<strong>${productoSeleccionado}</strong>`,
+    `$${precioM2.toLocaleString()}/m² × ${area.toFixed(2)}m² × ${cantidad}u = $${subtotalBase.toLocaleString('es-MX', {minimumFractionDigits:2})}`,
+  ];
+
+  if (extras.length) {
+    desgloseLines.push(`Extras: ${extras.join(', ')} = +$${extrasTotal.toLocaleString()}`);
+  }
+
+  document.getElementById('desglose').innerHTML = desgloseLines.join('<br>');
+  document.getElementById('precioFinal').textContent = total.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+}
+
+async function enviarCotizacion() {
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '⏳ Enviando...';
+  btn.disabled = true;
+
+  const { area, precioM2, subtotalBase, extrasTotal, total } = calcularPrecio();
+  const folio = 'COT-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+
+  const payload = {
+    folio,
+    fecha: new Date().toLocaleDateString('es-MX'),
+    cliente: {
+      nombre: document.getElementById('nombre').value,
+      empresa: document.getElementById('empresa').value,
+      email: document.getElementById('email').value,
+      telefono: document.getElementById('telefono').value,
+      ciudad: document.getElementById('ciudad').value,
+    },
+    producto: {
+      tipo: productoSeleccionado,
+      material: document.getElementById('material').value,
+      color: document.getElementById('color').value,
+      cantidad: parseInt(document.getElementById('cantidad').value) || 1,
+      ancho: parseFloat(document.getElementById('ancho').value),
+      alto: parseFloat(document.getElementById('alto').value),
+      area_m2: parseFloat(area.toFixed(2)),
+    },
+    extras: Array.from(document.querySelectorAll('#extrasGrid input:checked')).map(c => ({
+      nombre: c.value,
+      precio: parseFloat(c.dataset.precio)
+    })),
+    precios: {
+      precio_m2: precioM2,
+      subtotal_base: parseFloat(subtotalBase.toFixed(2)),
+      total_extras: parseFloat(extrasTotal.toFixed(2)),
+      total: parseFloat(total.toFixed(2)),
+      moneda: 'MXN'
+    },
+    notas: document.getElementById('notas').value,
+    vigencia: document.getElementById('vigencia').value,
+  };
+
+  try {
+    // ⬇️ CAMBIA ESTA URL POR TU WEBHOOK DE N8N
+    https://acorrea.app.n8n.cloud/webhook-test/cotizacion
+
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error('Error del servidor');
+
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.getElementById('progressBar').style.display = 'none';
+    document.querySelector('.header').style.display = 'none';
+    document.getElementById('successScreen').classList.add('visible');
+    document.getElementById('folioNum').textContent = folio;
+
+  } catch (err) {
+    // Para demo: mostrar éxito aunque falle el webhook
+    console.warn('Webhook no configurado, mostrando demo:', err);
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.getElementById('progressBar').style.display = 'none';
+    document.querySelector('.header').style.display = 'none';
+    document.getElementById('successScreen').classList.add('visible');
+    document.getElementById('folioNum').textContent = folio;
+  }
+}
+
+// Init price
+calcularPrecio();
+</script>
+</body>
+</html>
